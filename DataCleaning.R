@@ -1,222 +1,260 @@
 ---
-title: "Data Cleaning and Organization"
-author: "Bryan Mannix"
-date: "18/04/2022"
+#!/usr/bin/env Rscript
 
+# Run with 'Rscript data_cleaning_and_exploration.r'
 
+## Data Cleaning and Standardization:
+##   1. Inital Exploration
+##     a. Data set dimensions (number of rows and columns)
+##     b. Summary of variables
+##     c. Identify potential problems
+##     d. Quick visualization
+##       1. Why visualize? Look at Anscombe’s quartet for an example.
+##       2. Observe outlying values
+##       3. Observe and understand the shape of the distributions
+##   2. Fixing errors
+##     a. Remove irrelevant columns or rows
+##     b. Identify and deal with missing values
+##     c. Look for and remove incorrect data (impossible values, duplicates, typos, and extra spaces)
+##     d. Errors vs. Artifacts
+##   3. Standardize values
+##      a. Scaling (changing the range of data)
+##      b. Normalization
+##   4. Dimensionality reduction: Can you get rid of any columns?
+##      a. High ratio of missing values (based on a determined threshold)
+##      b. High correlation with other variable(s)
+##      c. Various methods discussed here
+##   5. Repeat visualization
+##   6. Write a cleaned data frame to a .csv file
+##   7. Convert your df to a tibble
+##
+## Data Exploration:
+##   1. Descriptive Stats
+##   2. Exploratory Data Analysis (EDA)
+##   3. Visual presentation
 
-
-## Data Exploration
-
-Data cleaning, processing, and munging can be a very time consuming processes. You can save time by developing a workflow for these tasks that you can apply for each data set you need to process. Taking deliberate steps on the front end of your project to properly process your data will help you 1) become familiar with your data and any quality issues that may exist, and 2) may save you from headaches down the road because you missed something important.
-
-In this exercise we'll present an outline that you can follow to help you with your day-to-day data organization tasks. When working with your own project data, some of these steps may require you to put the data in context and/or have an understanding of the source domain. If you do not have the domain expertise to determine whether data values make sense, or if you have questions about how the data was collected, you need to work with a domain expert.
-
-Starting with a new, raw, tabular data set, we will follow these steps to learn more about it and clean up where we need to so we analyze it properly:
-
-Data Exploration and Cleaning:
-1. Inital Exploration
-   a. Data set dimensions (number of rows and columns)
-   b. Summary of variables
-   c. Identify potential problems
-   d. Quick visualization
-     1. Why visualize? Look at Anscombe’s quartet for an example.
-     2. Observe outlying values
-     3. Observe and understand the shape of the distributions
-2. Fixing errors
-    a. Identify and deal with missing values
-    b. Look for and remove incorrect data (impossible values, duplicates, typos, and extra spaces)
-    c. Remove irrelevant columns or rows
-    e. Standardize values
-       1. Scaling
-       2. Normalization
-    f. Dimensionality reduction: Can you get rid of any columns?
-       1. High ratio of missing values (based on a determined threshold)
-       2. High correlation with other variable(s)
-       3. Various methods discussed here
-    g. Repeat visualization
-    h. Create a data dictionary or codebook
-       1. Manually (e.g., in a spreadsheet)
-       2. Attach to your dataset 
-    i. Errors vs. Artifacts
-
-
-### 1) Initial Exploration
-
-We'll use a toy data set of companies to start things off. Let's load the data and take a look at it:
-```{r}
-companies <- read.csv("datasets/company_dataset.csv", header = TRUE, stringsAsFactors = FALSE)
+# Load the dataset
 # Identifies missing data more accurately. Why is this?
 library(readr)
-companies <- read_csv("datasets/company_dataset.csv")
+companies <- read_csv("/Users/mbc400/Box Sync/GitHub/data-cleaning-with-r/datasets/company_dataset.csv")
+
+
+##
+## 1. Initial Exploration
+##   a. Summary of variables
+##   b. Data set dimensions (number of rows and columns)
+##   c. Identify potential problems
+##   d. Quick visualization
+##     1. Why visualize? Look at Anscombe’s quartet for an example.
+##     2. Observe outlying values
+##     3. Observe and understand the shape of the distributions
+
 # Look at the data frame
 View(companies)
-# Type of data structure in R
-class(companies)
-# Data set dimensions
-dim(companies)
-# Look at the data structure
-str(companies)
+
 # Summarize the data
 summary(companies)
-```
-### 2) Quick Visual Exploration
 
-```{r}
+# Look at the data structure
+str(companies)
+
+# Type of data structure in R
+class(companies)
+
+# Data set dimensions
+dim(companies)
+
+# Quick Visual Exploration
+#
 # This helps us get an idea about the distribution of values for different variables and lets us know if we have any outliers
 hist(companies$Gross_Income_2013)
 boxplot(companies$Num_widgets)
-```
 
-### 3) Fixing Errors
 
-#### A. Look for Missing Data
+## 2. Fixing Errors
+##
+##   a. Remove irrelevant columns or rows
+##
 
-##### Count the number of missing values
+# Add some content here
 
-```{r}
-# Checking for missing values; returns a logical data frame with TRUE if value is missing,
-# FALSE otherwise 
+## 2. Fixing Errors
+##
+##   b. Identify and deal with missing values
+##
+##      IMPORTANT NOTE: Verify that all missing values are actually missing. If you notice more missing values
+##                      than expected, make sure there wasn't a problem at the data import step.
+
+###
+# Count the number of missing values
+###
+
+# Checking for missing values; returns a logical data frame with TRUE if value is missing, FALSE otherwise
 is.na(companies)
+
 # Returns the number of missing values in each column
 sapply(companies, function(x) sum(is.na(x)))
+
 # Returns just columns with missing values
 missing_vals <- sapply(companies, function(x) sum(is.na(x)))
 missing_vals[missing_vals > 0]
+
 # List all records that have any missing values
 companies[!complete.cases(companies),]
-```
 
-##### Verify that all missing values are actually missing
-  
-If you notice more missing values than expected, make sure there wasn't a problem at the data import step.
+###
+# Decide what to do with missing values
+###
 
-##### Decide what to do with missing values
-
-(@) *Ignore*
-
-If you choose to ignore missing values remember to use `na.rm = TRUE` for aggregate functions or you will get `NA` as a result:
-
-```{r}
+# Ignore
+#
+# If you choose to ignore missing values remember to use `na.rm = TRUE` for aggregate functions or you will
+# get `NA` as a result:
 mean(companies$Num_widgets, na.rm=TRUE)
-```
 
-
-(@) *Exclude*
-
-``` {r}
+# Exclude
+#
 # Return all rows with missing values in at least one column
 companies[!complete.cases(companies),]
+
 # Create a new data frame containing only rows with no missing data
 companies_new <- na.omit(companies)
-```
 
-(@) *Replace*
-
-``` {r}
+# Replace
+#
 # Eliminate all missing values from a data frame
 na.omit(companies)
+
 # Eliminate all missing values from all values in a column
 na.omit(companies$Status)
+
 # Replace all NA's in a data frame with '0'
 companies[is.na(companies)] <- 0
+
 # Replace all NA's in a data frame column with '0'
 companies$Num_widgets[is.na(companies$Num_widgets)] <- 0
+
 # Replace all NA's in a column with the median value of the column
 companies$Num_widgets[is.na(companies$Num_widgets)] <- median(companies$Num_widgets)
-```
 
-#### b) Look for and remove incorrect data
+## 2. Fixing Errors
+##
+##   c. Look for and remove incorrect data (impossible values, duplicates, typos, and extra spaces)
+##
 
-(@) *Recode impossible values to missing*
-    
-If you know that a particular range of values for a variable is invalid, you can set those values as missing so as not to throw off your analysis later on:
-    
-``` {r}
+# Recode impossible values to missing
+#
+# If you know that a particular range of values for a variable is invalid, you can set those values
+# as missing so as not to throw off your analysis later on:
+
 # Recode negative (impossible) values in the Num_widgets column to NA
 companies$Num_widgets[companies$Num_widgets < 0] <- NA
-```
 
-(@) *Duplicates*
-
-``` {r}
+# Duplicates
+#
 # Are any of the rows in our data frame duplicated?
 # Returns the array index of the first duplicate if any, otherwise 0.
 anyDuplicated(companies)
-# a	Dufus & Dingus Ltd.		500000	1	yes	1/1/14 10:00
-# b	Snooty Pants Fashion	silver     	100000	5	  no	1/1/14 13:24
-# b	Snooty Pants Fashion	silver     	100000	5	  no	1/1/14 13:24
-# b	Snooty Pants Fashion	silver     	100000	5	  no	1/1/14 13:24
-# c	Harry Ham Handlers	gold	123409	67	no	1/1/14 15:05
+
+    # a	Dufus & Dingus Ltd.	            	500000	1 	yes	1/1/14 10:00
+    # b	Snooty Pants Fashion	silver     	100000	5	  no	1/1/14 13:24
+    # b	Snooty Pants Fashion	silver     	100000	5	  no	1/1/14 13:24
+    # b	Snooty Pants Fashion	silver     	100000	5	  no	1/1/14 13:24
+    # c	Harry Ham Handlers	  gold	      123409	67	no	1/1/14 15:05
+
 # Logical vector that shows duplicates
 duplicated(companies)
+
 # Row indeces of duplicates
 # https://stackoverflow.com/questions/12495345/find-indices-of-duplicated-rows
 which(duplicated(companies) | duplicated(companies[nrow(companies):1, ],fromLast = TRUE)[nrow(companies):1])
+
 # Works too. Why use the above command?
 which(duplicated(companies))
+
 # Create a new data frame of only unique rows
 unique_companies <- unique(companies)
-# Same using 'tidyverse'
-    library(dplyr)
-    unique_companies <- companies %>% distinct()
-    
-    # Remove duplicated rows based on duplication in a specific column
-    companies %>% distinct(Account_Name, .keep_all = TRUE)
-# For more details you can use a table to find duplicated values in columns that should contain unique values only. Then you can look at the associated full records to see what kind of duplication it is (e.g., full row vs. mistakenly entered Account_Name) 
-    # Lists the values of 'Account_Name' and the number of times they occur
-    occurrences <- data.frame(table(companies$Account_Name))
-    
-    # tells you which ids occurred more than once.
-    occurrences[occurrences$Freq > 1,]
-    
-    # Returns the records that contain the duplicated 'Account_Name'
-    companies[companies$Account_Name %in% occurrences$Var1[occurrences$Freq > 1],]
-```
 
-(@) *Typos*
+# Same using the dplyr package
+library(dplyr)
+unique_companies <- companies %>% distinct()
 
-``` {r}
+# Remove duplicated rows based on duplication in a specific column
+companies %>% distinct(Account_Name, .keep_all = TRUE)
+
+# For more details you can use a table to find duplicated values in columns that should contain unique
+# values only. Then you can look at the associated full records to see what kind of duplication it is
+# (e.g., full row vs. mistakenly entered Account_Name)
+
+# Lists the values of 'Account_Name' and the number of times they occur
+occurrences <- data.frame(table(companies$Account_Name))
+
+# tells you which ids occurred more than once.
+occurrences[occurrences$Freq > 1,]
+
+# Returns the records that contain the duplicated 'Account_Name'
+companies[companies$Account_Name %in% occurrences$Var1[occurrences$Freq > 1],]
+
+# Typos
+#
+# Identifiy typos in status categories...
 table(companies$Status, useNA = "ifany")
+
+# then fix them
 companies$Status[companies$Status == "bornze"] <- "bronze"
+
+# Same for the 'Complete' column
 table(companies$Complete, useNA = "ifany")
 companies$Complete[companies$Complete == "yess"] <- "yes"
 companies$Complete[companies$Complete == "NOT"] <- "no"
-```
 
-
-(@) *Removing Extra Spaces*
-
-``` {r}
+# Removing Extra Spaces
+#
 # Eliminate all leading and trailing white space from every value in the data frame
 # sapply returns a matrix, so we have to cast companies_no_ws back as a data frame.
 companies_no_ws <- as.data.frame(sapply(companies, function(x) trimws(x)), stringsAsFactors = FALSE)
+
 # Works on columns
 # Removes leading and trailing white space from specific columns
 library(stringr)
 companies$Complete <- str_trim(companies$Complete)
+
 # Remove extra spaces within account names
 companies$Account_Name <- gsub("\\s+"," ", companies$Account_Name)
-```
 
-(@) *Fixing case issues with categorical data*
-
-``` {r}
+# Fixing case issues with categorical data
+#
+# Look at the different status categories again...
 table(companies$Status, useNA = "ifany")
+
+# ...and change them all to lower case
 companies$Status <- sapply(companies$Status, tolower)
+
+# check your work
 table(companies$Status, useNA = "ifany")
-```
 
 
-### c) Standardize values
+## 2. Fixing Errors
+##
+##   d. Errors vs. Artifacts
+##
+
+# Sometimes during the import, organization, or cleaning stages of a project you inadvertantly introduce
+# artifacts into your data. For example, when you import data in Excel it sometimes chooses the wrong data
+# type for one or more of your columns (assigning a column with eight digit numeric values as type 'date').
+# Keep this in mind so you don't carry these artifacts into your analysis steps.
+
+
+## 3. Standardize values
+##
+##   a. Scaling (changing the range of data)
+##
 
 # https://www.thekerneltrip.com/statistics/when-scale-my-data/
-
-
 # Scaling vs. normalization: https://www.quora.com/When-should-you-perform-feature-scaling-and-mean-normalization-on-the-given-data-What-are-the-advantages-of-these-techniques
 
-(@) *Scaling (changing the range of data)*
-# If you want to compare columns that are on a different scale, you need to change both sets of values to use a common scale. Algorithms such as SVM and KNN treat a change of '1' in a value with the same importance.
+# If you want to compare columns that are on a different scale, you need to change both sets of values to
+# use a common scale. Algorithms such as SVM and KNN treat a change of '1' in a value with the same importance.
 
 # https://stackoverflow.com/questions/15215457/standardize-data-columns-in-r
 dat <- data.frame(x = rnorm(10, 30, .2), y = runif(10, 3, 5))
@@ -226,96 +264,49 @@ scaled.dat <- scale(dat)
 colMeans(scaled.dat)  # faster version of apply(scaled.dat, 2, mean)
 apply(scaled.dat, 2, sd)
 
-(@) *Normalization (changing the shape of the distribution of the data)
-# Needed when running algorithms that assume a normal distribution such as t-test, ANOVA, linear regression, LDA, and Gaussian Naive Bayes.
+
+## 3. Standardize values
+##
+##   b. Normalization (changing the shape of the distribution of the data)
+##
+
+# Needed when running algorithms that assume a normal distribution such as t-test, ANOVA, linear regression,
+# LDA, and Gaussian Naive Bayes.
 # We can make a "right-skewed" variable in the following manner:
-# [a] drawing from a (standard)-normal distribution, and then: 
+# [a] drawing from a (standard)-normal distribution, and then:
 # [b] exponentiating the results
- 
+
 x <- exp(rnorm(100,0,1))  # Combined [a] and [b]
- 
+
 hist(x)           # Plot the original right-skewed variable;
 hist(log(x))      # plot the logged-version of the variable.
 
-### d) Remove irrelevant columns (dimensionality reduction) or rows
 
-### e) Check for outliers using visualization
+##   4. Dimensionality reduction: Can you get rid of any columns?
+##      a. High ratio of missing values (based on a determined threshold)
+##      b. High correlation with other variable(s)
+##      c. Various methods discussed here
 
-``` {r}
+## 5. Repeat visualization
+
 library(ggplot2)
 ggplot(companies, aes(x = Status, fill = Complete)) + geom_bar()
-```
 
+## 6. Write a cleaned data frame to a .csv file
+write.csv(companies, "/Users/mbc400/Box Sync/GitHub/data-cleaning-with-r/output/companies_cleaned.csv", row.names = FALSE)
 
-Sometimes during the import, organization, or cleaning stages of a project you inadvertantly introduce artifacts into your data. For example, when you import data in Excel it sometimes chooses the wrong data type for one or more of your columns (assigning a column with eight digit numeric values as type 'date'). Keep this in mind so you don't carry these artifacts into your analysis steps.
+## 7. Convert your data frame to a tibble
 
+# With the 'dplyr' package, you can convert your data from to a tibble
+companies_tbl <- as_tibble(companies_cleaned)
+companies_tbl
 
-### 2. Create a Data Dictionary
+# Check out the newly created tibble with 'glimpse'
+glimpse(companies_tbl)
 
-This is usually a list of variables or data elements along with a description of each one (metadata about your data). You’ll want to include things like file name, column id, column name, variable type, count, notes, and warnings to your collaborators regarding any errors or mismatches.
+# Convert back to a data frame if you like
+companies_cleaned <- as.data.frame(companies_tbl)
 
-1. Identify categorical and continuous variables
-2. Get the overall dimensions of the data set (number of rows and
-columns)
-3. Find out how many instances of each variable there are (total count)
-
-You can use the R package [dataMeta](https://cran.r-project.org/web/packages/dataMeta/vignettes/dataMeta_Vignette.html) to create a data dictionary and attach it to your dataset. We use the built-in dataset 'iris' to demonstrate below:
-
-```{r}
-library(dataMeta)
-#erase after testing
-companies <- read.csv("/Users/mbc400/Box Sync/GitHub/Test_Data_Sets/company_dataset.csv", header = TRUE, stringsAsFactors = FALSE)
-### Three steps
-##
-# Step 1: Build a linker data frame
-##
-# Add a description for each variable name and identify the type
-var_desc <- c("Account number", "Company name", "Current award level status", "2013 gross income", "Number of widgets the company created in 2013", "Is their record in our system complete or not?", "Last time the record was updated")
-# Variable types can be:
-# 0: can be displayed as a range of values
-# 1: descriptive or categorical variables  
-var_type <- c(0, 0, 1, 0, 0, 1, 0)
-# Build the linker data frame
-linker <- build_linker(my.data = companies, variable_description = var_desc, variable_type = var_type)
-linker
-##
-# Step 2: Build the data dictionary using the data + the linker
-##
-# For this data set, no further option description is needed.
-dictionary <- build_dict(my.data = companies, linker = linker, option_description = NULL, prompt_varopts = FALSE)
-# Create main_string for attributes
-main_string <- "This dataset describes several companies' award statuses, income, and productivity in 2013."
-complete_dataset <- incorporate_attr(my.data = companies, data.dictionary = dictionary,
-main_string = main_string)
-# Just the dictionary...
-attr(complete_dataset, "dictionary")
-# or...
-attributes(complete_dataset)$dictionary
-```
-
-Write the dictionary and dataset + dictionary to output files:
-
-``` {r}
-library(lubridate)
-library(forcats)
-# Change columns to appropriate types before writing to file
-complete_dataset$Date = mdy_hm(complete_dataset$Date)
-complete_dataset$Status = as_factor(complete_dataset$Status)
-complete_dataset$Complete = as_factor(complete_dataset$Complete)
-# Export dictionary only:
-dict_only <- attributes(complete_dataset)$dictionary
-write.csv(dict_only, "./output/companies_dict_only.csv")
-# Save as an R dataset, .rds (dataset with appended dictionary)
-save_it(complete_dataset, name_of_file = "./output/companies_with_dict")
-```
-
-
-# References:
-
-1. https://towardsdatascience.com/the-art-of-cleaning-your-data-b713dbd49726
-2. https://www.statmethods.net/input/missingdata.html
-3. http://dataanalyticsedge.com/2018/05/02/data-cleaning-using-r/
-4. https://bookdown.org/lyzhang10/lzhang_r_tips_book/preface.html
-5. https://cran.r-project.org/web/packages/summarytools/vignettes/Introduction.html
-6. https://dabblingwithdata.wordpress.com/2018/01/02/my-favourite-r-package-for-summarising-data/
-7. https://cran.r-project.org/web/packages/dataMeta/vignettes/dataMeta_Vignette.html
+# test
+median_gross <- companies %>%
+  summarize (median_gross = median(Gross_Income_2013))
