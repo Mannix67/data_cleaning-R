@@ -85,4 +85,6 @@ Data Exploration
 
 
 Understanding data requires knowing the domain and the context
+
+
 So that they are used properly, many of the techniques described above require that you understand the data. This means that you know the context in which the data were collected and have the domain knowledge to know if the data make sense. Making decisions on, for instance, how to normalize a certain variable in a data set without having a grasp on these two issues can results in data corruption or misrepresentation.
