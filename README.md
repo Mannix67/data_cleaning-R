@@ -81,7 +81,7 @@ Data Exploration
 
     ii)Exploratory Data Analysis (EDA)
 
-   iii)Visual presentation
+    iii)Visual presentation
 
 
 Understanding data requires knowing the domain and the context
