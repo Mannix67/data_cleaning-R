@@ -17,7 +17,7 @@
 library(dataMeta)
 
 #erase after testing
-companies <- read.csv("/Users/mbc400/Box Sync/GitHub/data-cleaning-with-r/output/companies_cleaned.csv", header = TRUE, stringsAsFactors = FALSE)
+companies <- read.csv("/Users/Mannix67/Box Sync/GitHub/data-cleaning-with-r/output/companies_cleaned.csv", header = TRUE, stringsAsFactors = FALSE)
 
 ### Three steps
 ##
@@ -64,7 +64,7 @@ complete_dataset$Complete = as_factor(complete_dataset$Complete)
 
 # Export dictionary only:
 dict_only <- attributes(complete_dataset)$dictionary
-write.csv(dict_only, "/Users/mbc400/Box Sync/GitHub/data-cleaning-with-r/output/companies_cleaned_dict_only.csv")
+write.csv(dict_only, "/Users/Mannix67/Box Sync/GitHub/data-cleaning-with-r/output/companies_cleaned_dict_only.csv")
 
 # Save as an R dataset, .rds (dataset with appended dictionary)
-save_it(complete_dataset, name_of_file = "/Users/mbc400/Box Sync/GitHub/data-cleaning-with-r/output/companies_cleaned_with_dict")
+save_it(complete_dataset, name_of_file = "/Users/Mannix67/Box Sync/GitHub/data-cleaning-with-r/output/companies_cleaned_with_dict")
