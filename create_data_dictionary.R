@@ -1,4 +1,4 @@
-##  Create a data dictionary or codebook
+##  Create a data dictionary or codebook.
 ##    a. Manually (e.g., in a spreadsheet)
 ##    b. Attach to your dataset using the dataMeta package
 
