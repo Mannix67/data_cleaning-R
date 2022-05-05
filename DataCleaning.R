@@ -36,7 +36,7 @@
 # Load the dataset
 # Identifies missing data more accurately. Why is this?
 library(readr)
-companies <- read_csv("/Users/mbc400/Box Sync/GitHub/data-cleaning-with-r/datasets/company_dataset.csv")
+companies <- read_csv("/Users/Mannix67/Box Sync/GitHub/data-cleaning-with-r/datasets/company_dataset.csv")
 
 
 ##
