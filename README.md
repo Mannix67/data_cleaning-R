@@ -1,3 +1,5 @@
+# Click .R files above to see data cleaning process. 
+
 # data_cleaning-R
 A workflow and exercises for data cleaning, processing, and munging tabular data in R
 Data Cleaning and Organization
