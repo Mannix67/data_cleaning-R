@@ -293,7 +293,7 @@ library(ggplot2)
 ggplot(companies, aes(x = Status, fill = Complete)) + geom_bar()
 
 ## 6. Write a cleaned data frame to a .csv file
-write.csv(companies, "/Users/mbc400/Box Sync/GitHub/data-cleaning-with-r/output/companies_cleaned.csv", row.names = FALSE)
+write.csv(companies, "/Users/mannix67/Box Sync/GitHub/data-cleaning-with-r/output/companies_cleaned.csv", row.names = FALSE)
 
 ## 7. Convert your data frame to a tibble
 
