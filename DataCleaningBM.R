@@ -1,5 +1,5 @@
 ---
-#!/usr/bin/env Rscript
+#!/usr/bin/env Rscript.
 
 # Run with 'Rscript data_cleaning_and_exploration.r'
 
